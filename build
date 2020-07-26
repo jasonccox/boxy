@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# build - Script to build boxy container with user and group set based on
+# current user and group.
+
+tag=${1-boxy}
+
+user=$(id -un)
+group=$(id -gn)
+uid=$(id -u)
+gid=$(id -g)
+
+sudo docker build \
+    --tag $tag \
+    --build-arg user=$user \
+    --build-arg group=$group \
+    --build-arg uid=$uid \
+    --build-arg gid=$gid \
+    .
