@@ -13,8 +13,9 @@ xhost local:root &> /dev/null || echo Clipboard sharing failed >2
 
 sudo docker run \
     --env DISPLAY \
-    --volume /tmp/.X11-unix:/tmp/.X11-unix \
+    --hostname "$tag-$(hostname)" \
     --interactive \
     --tty \
+    --volume /tmp/.X11-unix:/tmp/.X11-unix \
     $tag \
     /bin/bash

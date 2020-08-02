@@ -62,10 +62,13 @@ ENV LANG=en_US.UTF-8 \
     USER=$user
 
 # download generic configurations
-RUN git clone --recurse-submodules https://github.com/jasonccox/dotfiles.git && \
+RUN git clone \
+        --branch boxy \
+        --recurse-submodules \
+        https://github.com/jasonccox/dotfiles.git && \
     mkdir -p ~/.config/coc && \
     cd dotfiles && \
     ./setup.sh git shell ssh tmux vim && \
-    rm -rf .git karabiner pim plasma setup.sh vimium-options.json
+    rm -rf .git setup.sh
 
 # add project- or language-specific configurations here
