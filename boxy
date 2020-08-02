@@ -1,0 +1,20 @@
+#!/bin/bash
+
+tag=${1-boxy}
+
+# build image if needed
+if [ -z "$(sudo docker image ls -q $tag)" ]; then
+    echo Image not found -- building
+    ./build $tag
+fi
+
+# allow docker to connect to X server for clipboard sharing
+xhost local:root &> /dev/null || echo Clipboard sharing failed >2
+
+sudo docker run \
+    --env DISPLAY \
+    --volume /tmp/.X11-unix:/tmp/.X11-unix \
+    --interactive \
+    --tty \
+    $tag \
+    /bin/bash

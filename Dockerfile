@@ -17,7 +17,9 @@ RUN sed -i 's/apt-get upgrade/apt-get upgrade -y/' /usr/local/sbin/unminimize &&
         ripgrep \
         sudo \
         tmux \
-        vim && \
+        # need gui for clipboard support, and athena is smaller than gtk
+        vim-athena \
+        xclip && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /usr/share/fzf && \
     ln -s /usr/share/doc/fzf/examples/key-bindings.bash /usr/share/fzf/key-bindings.bash && \
