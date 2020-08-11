@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# build - Script to build boxy container with user and group set based on
+# build - Script to build base boxy container with user and group set based on
 # current user and group.
 
-tag=${1-boxy}
+tag=${1:-boxy-base}
 
 user=$(id -un)
 group=$(id -gn)
@@ -16,4 +16,4 @@ sudo docker build \
     --build-arg group=$group \
     --build-arg uid=$uid \
     --build-arg gid=$gid \
-    .
+    /home/jason/code/boxy/base

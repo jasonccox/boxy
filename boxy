@@ -1,11 +1,22 @@
 #!/bin/bash
+#
+# boxy - Script to run a custom, terminal-based IDE in a box powered by Docker
+# Author: Jason Cox (dev@jasoncarloscox.com)
 
-tag=${1-boxy}
+if [ -f .boxy/name ]; then
+    tag="$(cat .boxy/name)"
+fi
+
+if [ -n "$1" ]; then
+    tag="$1"
+fi
+
+tag="${tag:-boxy-custom}"
 
 # build image if needed
 if [ -z "$(sudo docker image ls -q $tag)" ]; then
     echo Image not found -- building
-    ./build $tag
+    /home/jason/code/boxy/custom/build $tag
 fi
 
 # allow docker to connect to X server for clipboard sharing

@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# boxy-copy - Recursively copy a directory with the option to append to existing
+# files instead of overwriting them.
+
+src="${1%/}"
+dst="${2%/}"
+append=true
+
+if [ "$3" = --no-append ]; then
+    append=false
+fi
+
+if [ -z "$src" ] || [ -z "$dst" ]; then
+    echo "USAGE: $0 SOURCE DESTINATION [--[no-]append]"
+    exit 1
+fi
+
+if $append; then
+    append_copy() {
+        file="${1#$src}" # strip src prefix from argument
+
+        if [ -d "$src/$file" ]; then
+            mkdir -p "$dst/$file"
+        else
+            if [ -e "$dst/$file" ]; then
+                cat "$src/$file" >> "$dst/$file"
+            else
+                cp "$src/$file" "$dst/$file"
+            fi
+        fi
+    }
+
+    export src
+    export dst
+    export -f append_copy
+
+    find $src -exec bash -c 'append_copy "$0" "$1"' {} "$src" \;
+else
+    cp -r "$src"/* "$dst"
+fi
+

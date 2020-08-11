@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# build - Script to build custom boxy container
+
+base_tag=boxy-base
+tag=${1:-boxy-custom}
+custom_dockerfile=/home/jason/code/boxy/custom/Dockerfile
+
+# make sure the .boxy directory exists
+if ! [ -d "$(pwd)/.boxy" ]; then
+    echo '.boxy directory not found'
+    exit 1
+fi
+
+# build base container if needed
+if [ -z "$(sudo docker image ls -q $base_tag)" ]; then
+    /home/jason/code/boxy/base/build $base_tag
+fi
+
+sudo docker build \
+    --tag $tag \
+    --file $custom_dockerfile \
+    --build-arg base=$base_tag \
+    "$(pwd)/.boxy"

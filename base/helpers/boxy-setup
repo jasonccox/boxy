@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# boxy-setup - Run project-specific setup inside the container
+
+dir="$1" # the parent of the .boxy directory
+
+# install system packages
+if [ -f "$dir/.boxy/packages" ]; then
+    boxy-install $(cat "$dir/.boxy/packages")
+fi
+
+# install coc.nvim extensions
+if [ -f "$dir/.boxy/coc-extensions" ]; then
+    extensions="$(cat "$dir/.boxy/coc-extensions" | tr '\n' ' ')"
+    vim +"silent! CocInstall -sync $extensions" +q +q > /dev/null
+fi
+
+# add vim plugins
+if [ -f "$dir/.boxy/vim-plugins" ]; then
+    mkdir -p .vim/pack/boxy/start
+    cd .vim/pack/boxy/start
+    for plugin in $(cat "$dir/.boxy/vim-plugins"); do
+        git clone --recurse-submodules --depth 1 "$plugin"
+    done
+    cd -
+fi
+
+# copy vim configuration files
+if [ -d "$dir/.boxy/vim" ]; then
+    boxy-copy "$dir/.boxy/vim" .vim
+fi

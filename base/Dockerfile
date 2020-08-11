@@ -52,8 +52,13 @@ RUN groupadd --gid $gid $group && \
     # fix annoying sudo output (https://github.com/sudo-project/sudo/issues/42)
     echo "Set disable_coredump false" >> /etc/sudo.conf
 
+# add helpers
+COPY helpers/* /usr/bin/
+RUN sed -i s/PASSWORD/$password/ /usr/bin/boxy-install
+
+# do the rest as the new user
 USER $user:$group
-WORKDIR /home/jason
+WORKDIR /home/$user
 ENV USER $user
 
 # set needed environment variables
@@ -70,5 +75,3 @@ RUN git clone \
     cd dotfiles && \
     ./setup.sh git shell ssh tmux vim && \
     rm -rf .git setup.sh
-
-# add project- or language-specific configurations here
