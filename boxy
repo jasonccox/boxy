@@ -28,5 +28,6 @@ sudo docker run \
     --interactive \
     --tty \
     --volume /tmp/.X11-unix:/tmp/.X11-unix \
+    --volume $HOME/.ssh/id_rsa:/home/"$(id -un)"/.ssh/id_rsa \
     $tag \
     /bin/bash
