@@ -19,7 +19,9 @@ RUN sed -i 's/apt-get upgrade/apt-get upgrade -y/' /usr/local/sbin/unminimize &&
         tmux \
         # need gui for clipboard support, and athena is smaller than gtk
         vim-athena \
-        xclip && \
+        xclip \
+        # need yarn or npm for coc.nvim, and yarn is way smaller
+        yarnpkg && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /usr/share/fzf && \
     ln -s /usr/share/doc/fzf/examples/key-bindings.bash /usr/share/fzf/key-bindings.bash && \
@@ -53,8 +55,8 @@ RUN groupadd --gid $gid $group && \
     echo "Set disable_coredump false" >> /etc/sudo.conf
 
 # add helpers
-COPY helpers/* /usr/bin/
-RUN sed -i s/PASSWORD/$password/ /usr/bin/boxy-install
+COPY helpers/* /bin/
+RUN sed -i s/PASSWORD/$password/ /bin/boxy-install
 
 # do the rest as the new user
 USER $user:$group
@@ -75,3 +77,5 @@ RUN git clone \
     cd dotfiles && \
     ./setup.sh git shell ssh tmux vim && \
     rm -rf .git setup.sh
+
+ENTRYPOINT ["/bin/boxy-entry"]
