@@ -2,6 +2,11 @@
 #
 # build - Script to build custom boxy container
 
+if [ "$1" = --build-base ]; then
+    build_base=yes
+    shift
+fi
+
 base_tag=boxy-base
 tag=${1:-boxy-custom}
 custom_dockerfile=/home/jason/code/boxy/custom/Dockerfile
@@ -13,7 +18,7 @@ if ! [ -d "$(pwd)/.boxy" ]; then
 fi
 
 # build base container if needed
-if [ -z "$(sudo docker image ls -q $base_tag)" ]; then
+if [ "$build_base" = yes ] || [ -z "$(sudo docker image ls -q $base_tag)" ]; then
     /home/jason/code/boxy/base/build $base_tag
 fi
 

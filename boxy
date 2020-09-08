@@ -7,6 +7,16 @@ if [ -f .boxy/name ]; then
     tag="$(cat .boxy/name)"
 fi
 
+if [ "$1" = "--build" ]; then
+    build=yes
+    shift
+fi
+
+if [ "$1" = "--build-base" ]; then
+    build_base="--build-base"
+    shift
+fi
+
 if [ -n "$1" ]; then
     tag="$1"
 fi
@@ -14,9 +24,9 @@ fi
 tag="${tag:-boxy-custom}"
 
 # build image if needed
-if [ -z "$(sudo docker image ls -q $tag)" ]; then
-    echo Image not found -- building
-    /home/jason/code/boxy/custom/build $tag
+if [ -n "$build" ] || [ -z "$(sudo docker image ls -q $tag)" ]; then
+    echo Building image
+    /home/jason/code/boxy/custom/build $build_base $tag
 fi
 
 # allow docker to connect to X server for clipboard sharing
