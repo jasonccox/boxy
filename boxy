@@ -3,23 +3,40 @@
 # boxy - Script to run a custom, terminal-based IDE in a box powered by Docker
 # Author: Jason Cox (dev@jasoncarloscox.com)
 
+usage() {
+    echo 'USAGE: boxy [--build] [--build-base] [--new] [--tag <tag>] [-- <docker args...>]'
+}
+
 if [ -f .boxy/name ]; then
     tag="$(cat .boxy/name)"
 fi
 
-if [ "$1" = "--build" ]; then
-    build=yes
+while [ -n "$1" ]; do
+    case "$1" in
+        --build)
+            build=yes
+            ;;
+        --build-base)
+            build_base=--build-base
+            ;;
+        --new)
+            new=yes
+            ;;
+        --tag)
+            if [ -z "$2" ]; then
+                usage
+                exit 1
+            fi
+            tag="$2"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+    esac
     shift
-fi
-
-if [ "$1" = "--build-base" ]; then
-    build_base="--build-base"
-    shift
-fi
-
-if [ -n "$1" ]; then
-    tag="$1"
-fi
+done
 
 tag="${tag:-boxy-custom}"
 
@@ -36,6 +53,22 @@ user="$(id -un)"
 full_dir="$(pwd)"
 dir="${full_dir##*/}"
 
+if [ -z "$new" ]; then
+    container="$(sudo docker container ls -a | grep $tag | head -n 1 | egrep -o '^[a-z0-9]+')"
+    if [ -n "$container" ]; then
+        echo Restarting old boxy container "$container"
+        sudo docker container restart "$container"
+
+        # restarting the container allocates another tty with tmux attached, so
+        # we need to detach it in order to not have a small window size
+        sleep 1
+        sudo docker container exec "$container" tmux detach-client
+
+        sudo docker exec --interactive --tty "$@" "$container" /bin/boxy-entry "$dir"
+        exit $?
+    fi
+fi
+
 sudo docker run \
     --env DISPLAY \
     --hostname "$tag-$(hostname)" \
@@ -44,5 +77,6 @@ sudo docker run \
     --volume /tmp/.X11-unix:/tmp/.X11-unix \
     --volume "$HOME/.ssh/id_rsa:/home/$user/.ssh/id_rsa" \
     --volume "$full_dir:/home/$user/$dir" \
+    "$@" \
     "$tag" \
     "$dir"
