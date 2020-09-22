@@ -78,4 +78,4 @@ RUN git clone \
     ./setup.sh git shell ssh tmux vim && \
     rm -rf .git setup.sh
 
-ENTRYPOINT ["/bin/boxy-entry"]
+CMD ["/bin/bash"]

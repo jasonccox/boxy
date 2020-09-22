@@ -50,10 +50,9 @@ fi
 xhost local:root &> /dev/null || echo Clipboard sharing failed >2
 
 user="$(id -un)"
-full_dir="$(pwd)"
-dir="${full_dir##*/}"
+dir="$(pwd)"
 
-if [ -z "$new" ]; then
+if [ -z "$new" ] && [ -z "$build" ]; then
     container="$(sudo docker container ls -a | grep $tag | head -n 1 | egrep -o '^[a-z0-9]+')"
     if [ -n "$container" ]; then
         echo Restarting old boxy container "$container"
@@ -64,9 +63,13 @@ if [ -z "$new" ]; then
         sleep 1
         sudo docker container exec "$container" tmux detach-client
 
-        sudo docker exec --interactive --tty "$@" "$container" /bin/boxy-entry "$dir"
+        sudo docker exec --interactive --tty "$@" "$container" /bin/bash
         exit $?
     fi
+fi
+
+if [ -f "/var/run/docker.sock" ]; then
+    docker_sock_vol="--volume /var/run/docker.sock:/var/run/docker.sock"
 fi
 
 sudo docker run \
@@ -75,8 +78,9 @@ sudo docker run \
     --interactive \
     --tty \
     --volume /tmp/.X11-unix:/tmp/.X11-unix \
+    $docker_sock_vol \
     --volume "$HOME/.ssh/id_rsa:/home/$user/.ssh/id_rsa" \
-    --volume "$full_dir:/home/$user/$dir" \
+    --volume "$dir:$dir" \
+    --workdir "$dir" \
     "$@" \
-    "$tag" \
-    "$dir"
+    "$tag"

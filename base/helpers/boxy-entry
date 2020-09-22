@@ -1,6 +1,0 @@
-#!/bin/bash
-#
-# boxy-entry - Script run on entry of boxy container
-
-cd ~/"$1"
-exec /bin/bash
